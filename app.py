@@ -37,7 +37,7 @@ def login():
         password = request.form['password']
         data = get_users_data()
         for one in data['users_lists']:
-            if username == one['username'] and password == one['password']:
+            if username == one['username'] and check_password_hash(one['password'],password):
                 session['username'] = request.form['username']
             break
         return redirect(url_for('index'))
