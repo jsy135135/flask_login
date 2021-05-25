@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+
+    <title>用户管理-PowerBI数据管理平台</title>
+    <!-- Bootstrap core CSS -->
+    <link href="{{url_for('static',filename='/css/bootstrap.min.css')}}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{{url_for('static',filename='/css/dashboard.css')}}" rel="stylesheet">
+    <style>
+        .useradd {
+            margin-top: 18px;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    {% raw %}
+    <div id="app" v-cloak>
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">PowerBI数据管理平台</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-3 col-md-2 sidebar">
+                    <ul class="nav nav-sidebar">
+                        <li class="active"><a href="#">用户列表</a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                    <h1 class="page-header">控制台</h1>
+                    <h2 class="sub-header">用户列表</h2>
+                    <div class="table-responsive">
+                        <button class="btn btn-success" data-toggle="modal" data-target="#myModal">添加用户</button>
+                        <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
+                              <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"
+                                            aria-label="Close"><span aria-hidden="true">×</span></button>
+                                        <h4 class="modal-title">添加用户</h4>
+                                    </div>
+                                         <div class="modal-body">
+                                        <!-- 此处是在模态框中显示的内容 -->
+                                          <div class="form-group">
+                                            <div class="useradd">
+                                                <input type="text" class="form-control" placeholder="用户名称"
+                                                    v-model="username">
+                                            </div>
+                                            <div class="useradd">
+                                                <input type="password" class="form-control" placeholder="密码"
+                                                    v-model="password">
+                                            </div>
+                                            <div class="useradd">
+                                                <input type="text" class="form-control" placeholder="真实姓名"
+                                                    v-model="name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                         <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        <button type="button" class="btn btn-primary" @click="user_add()">保存</button>
+                                    </div>
+                                </div><!-- /.modal-content -->
+                            </div><!-- /.modal-dialog -->
+                        </div><!-- /.modal -->
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>用户名</th>
+                                    <th>真实名称</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item,index in users_lists">
+                                    <td>{{index+1}}</td>
+                                    <td>{{item.username}}</td>
+                                    <td>{{item.name}}</td>
+                                    <td>
+                                        <!-- <button class="btn btn-sm btn-primary">更新</button> -->
+                                        <button class="btn btn-sm btn-danger"
+                                            @click="user_del(index,item.username)">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endraw %}
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="{{url_for('static',filename='/js/vue.js')}}"></script>
+    <script src="{{url_for('static',filename='/js/jquery-3.4.1.js')}}"></script>
+    <script src="{{url_for('static',filename='/js/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static',filename='/layer/layer.js')}}"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                users_lists: [],
+                username: '',
+                password: '',
+                name: ''
+            },
+            methods: {
+                user_add() {
+                    data = {
+                        'username': this.username,
+                        'password': this.password,
+                        'name': this.name
+                    }
+                    axios.post('/user_add', data)
+                        .then((response) => {
+                            // console.log(response.data)
+                            if (response.data.code === 0) {
+                                this.users_lists.push(data)
+                            }
+                            layer.msg(response.data.msg, function () {
+                                $('#myModal').modal('hide');
+                            });
+                        })
+                        .catch(function (error) {
+                            console.log(error)
+                        })
+                },
+                user_del(index, username) {
+                    layer.msg('确定删除' + username + '吗', {
+                        time: 0, //不自动关闭
+                        btn: ['确定', '退出'],
+                        yes: (msg_index) => {
+                            layer.close(msg_index);
+                            data = {
+                                'username': username,
+                            }
+                            axios.post('/user_del', data)
+                                .then((response) => {
+                                    if (response.data.code === 0) {
+                                        this.users_lists.splice(index, 1)
+                                    }
+                                    layer.msg(response.data.msg);
+                                })
+                                .catch(function (error) {
+                                    console.log(error)
+                                })
+                        }
+                    });
+                }
+            },
+            created() {
+                axios.post('/user')
+                    .then((response) => {
+                        // console.log(response.data.users_lists)
+                        this.users_lists = response.data.users_lists
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    })
+            }
+        })
+    </script>
+</body>
+
+</html>
