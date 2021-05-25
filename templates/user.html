@@ -33,7 +33,7 @@
         <nav class="navbar navbar-inverse navbar-fixed-top">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#">PowerBI数据管理平台</a>
+                    <a class="navbar-brand" href="/">PowerBI数据管理平台</a>
                 </div>
             </div>
         </nav>
@@ -137,7 +137,11 @@
                             if (response.data.code === 0) {
                                 this.users_lists.push(data)
                             }
-                            layer.msg(response.data.msg, function () {
+                            layer.msg(response.data.msg, 
+                            {
+                                time:500
+                            },
+                            function () {
                                 $('#myModal').modal('hide');
                             });
                         })
