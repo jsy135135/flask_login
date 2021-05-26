@@ -1,14 +1,12 @@
-from flask import Flask
-from flask import render_template
-from flask import request, jsonify
-from flask import make_response
-from flask import Flask, session, redirect, url_for, escape, request
+from flask import Flask, request, session, url_for, make_response, jsonify, render_template, redirect, escape
 from jinja2.utils import contextfunction
 from werkzeug import useragents
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+
 app = Flask(__name__)
 app.secret_key = 'fkdjsafjdkfdlkjfadskjfadskljdsfklj'
+app.config['JSON_AS_ASCII'] = False
 
 
 def get_users_data():
@@ -22,7 +20,6 @@ def save_users_data(data):
 
 
 @app.route('/')
-@app.route('/data')
 def index():
     if 'username' in session:
         username = session['username']
@@ -37,9 +34,9 @@ def login():
         password = request.form['password']
         data = get_users_data()
         for one in data['users_lists']:
-            if username == one['username'] and check_password_hash(one['password'],password):
+            if username == one['username'] and check_password_hash(one['password'], password):
                 session['username'] = request.form['username']
-            break
+                break
         return redirect(url_for('index'))
     return render_template('login.html')
 
@@ -52,15 +49,16 @@ def logout():
 
 @app.route('/user', methods=['GET', 'POST'])
 def user():
-    if request.method == 'POST':
-        return jsonify(get_users_data())
-    else:
-        return render_template('user.html')
+    if 'username' in session and session['username'] == 'admin':
+        if request.method == 'POST':
+            return jsonify(get_users_data())
+        else:
+            return render_template('user.html')
+    return redirect(url_for('login'))
 
 
 @app.route('/user_add', methods=['POST'])
 def user_add():
-    # print(type(request.json))
     username = request.json['username']
     password = generate_password_hash(request.json['password'])
     name = request.json['name'] if request.json['name'] else request.json['username']
@@ -97,5 +95,4 @@ def user_del():
 
 
 if __name__ == '__main__':
-    app.config['JSON_AS_ASCII'] = False
     app.run(debug=True)
