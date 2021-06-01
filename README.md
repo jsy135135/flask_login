@@ -1,3 +1,6 @@
+### 说明
+使用flask,实现的简单的基于session的登录案例
+
 ### 启动方式
 >Linux
 ```shell
@@ -16,8 +19,8 @@ python app.py
 ```
 
 ### 使用图示
-![flask_login](./flask_login.gif)
+![flask_login](./static/images/flask_login.gif)
 
 
 ### 可配置项
-1、默认用户名:admin,密码:admin123
+1、默认用户名:`admin`,密码:`admin123`
